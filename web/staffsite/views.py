@@ -1,8 +1,6 @@
 from django.views import View
 from django.shortcuts import render
-
-
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 
 class IndexView(View):
@@ -11,15 +9,19 @@ class IndexView(View):
         return render(request, 'staffsite/login.html')
 
 
+    # Login
     def post(self, request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
 
+        # Checking user
         if user is not None:
-            if user.is_staff:
-                return HttpResponse('<b>YOU ARE STAFF</b>')
+            if user.is_staff and user.is_active :
+                login(request, user)
+                email = request.user.email
+                return HttpResponse('<b>YOU ARE STAFF WITH EMAIL ' + email + '</b>')
             else:
-                return HttpResponse('<b>YOU ARE NOT STAFF</b>')
+                return render(request, 'staffsite/login.html')
         else:
-            return HttpResponse('<b>YOU DONT HAVE ACCOUNT</b>')
+            return render(request, 'staffsite/login.html')
